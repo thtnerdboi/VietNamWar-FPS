@@ -9,16 +9,31 @@ public class Health : MonoBehaviour
 
     public System.Action OnDeath;
 
+    public bool IsDead => current <= 0f;
+
     void Awake() { current = maxHealth; }
 
     public void Damage(float amt)
     {
-        current -= amt;
+        if (IsDead) return;
+        current = Mathf.Max(0f, current - amt);
         if (current <= 0f)
         {
             OnDeath?.Invoke();
             if (destroyOnDeath) Destroy(gameObject);
             enabled = false;
         }
+    }
+
+    public void Heal(float amt)
+    {
+        if (IsDead) return;
+        current = Mathf.Min(current + amt, maxHealth);
+    }
+
+    public void ResetHealth()
+    {
+        current = maxHealth;
+        enabled = true;
     }
 }
