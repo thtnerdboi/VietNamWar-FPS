@@ -1,0 +1,36 @@
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+sysinfo.txt
+
+# Crash/Profiler dumps
+*.stacktrace
+
+# Auto-generated solution/projects
+*.sln
+*.csproj
+*.unityproj
+*.pidb
+*.user
+*.userprefs
+*.suo
+
+# IDE
+.vs/
+.idea/
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Unity caches/artifacts
+*.mdb
+*.pdb
+*.orig
