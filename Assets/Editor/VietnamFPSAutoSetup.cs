@@ -61,6 +61,7 @@ public class VietnamFPSAutoSetup
         var cc = player.AddComponent<CharacterController>();
         cc.height = 1.8f; cc.center = new Vector3(0, 0.9f, 0);
         player.AddComponent<Health>();
+        player.AddComponent<PlayerHealth>();
         player.AddComponent<PlayerMovement>();
         var look = player.AddComponent<PlayerLook>();
 
