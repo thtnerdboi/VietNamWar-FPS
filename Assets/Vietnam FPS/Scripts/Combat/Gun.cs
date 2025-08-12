@@ -54,7 +54,6 @@ public class Gun : MonoBehaviour
         {
             var h = hit.collider.GetComponentInParent<Health>();
             if (h != null) h.Damage(damage);
-            // TODO: spawn impact effect
         }
     }
 
