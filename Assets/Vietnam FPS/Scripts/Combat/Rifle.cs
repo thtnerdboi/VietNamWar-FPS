@@ -32,6 +32,7 @@ public class Rifle : MonoBehaviour
 
     Gun gun;
     GameObject visualInstance;
+    Material placeholderMaterial;
 
     void Reset()
     {
@@ -68,15 +69,16 @@ public class Rifle : MonoBehaviour
         if (visualInstance != null) return;
 
         var prefab = m16Prefab != null ? m16Prefab : Resources.Load<GameObject>(prefabResourcePath);
-        if (prefab == null)
+        if (prefab != null)
         {
-            Debug.LogWarning($"Rifle: Could not locate an M16 prefab at '{prefabResourcePath}'. " +
-                             "Drop the asset into Resources/" + prefabResourcePath + " or assign it explicitly.");
+            visualInstance = Instantiate(prefab, visualAnchor, false);
+            ApplyMaterials(visualInstance);
             return;
         }
 
-        visualInstance = Instantiate(prefab, visualAnchor, false);
-        ApplyMaterials(visualInstance);
+        Debug.LogWarning($"Rifle: Could not locate an M16 prefab at '{prefabResourcePath}'. " +
+                         "Using a generated placeholder model instead.");
+        visualInstance = CreatePlaceholderModel();
     }
 
     void ApplyMaterials(GameObject target)
@@ -125,5 +127,82 @@ public class Rifle : MonoBehaviour
 
         materials[0] = material;
         mainRenderer.sharedMaterials = materials;
+    }
+
+    GameObject CreatePlaceholderModel()
+    {
+        if (visualAnchor == null) visualAnchor = transform;
+
+        var root = new GameObject("M16_Placeholder");
+        root.transform.SetParent(visualAnchor, false);
+
+        CreatePart(root.transform, "Receiver", new Vector3(0.06f, 0.08f, 0.55f), new Vector3(0f, -0.03f, -0.05f));
+        CreatePart(root.transform, "Barrel", new Vector3(0.03f, 0.03f, 0.55f), new Vector3(0f, 0.01f, 0.3f));
+        CreatePart(root.transform, "Stock", new Vector3(0.08f, 0.08f, 0.35f), new Vector3(0f, -0.03f, -0.45f));
+        CreatePart(root.transform, "Grip", new Vector3(0.05f, 0.12f, 0.1f), new Vector3(0f, -0.1f, -0.05f));
+        CreatePart(root.transform, "CarryHandle", new Vector3(0.04f, 0.06f, 0.3f), new Vector3(0f, 0.05f, -0.05f));
+
+        return root;
+    }
+
+    void CreatePart(Transform parent, string name, Vector3 scale, Vector3 localPosition)
+    {
+        var part = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        part.name = name;
+        part.transform.SetParent(parent, false);
+        part.transform.localScale = scale;
+        part.transform.localPosition = localPosition;
+
+        var collider = part.GetComponent<Collider>();
+        if (collider != null)
+        {
+            Destroy(collider);
+        }
+
+        var renderer = part.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            var material = GetPlaceholderMaterial();
+            if (material != null)
+            {
+                renderer.sharedMaterial = material;
+            }
+        }
+    }
+
+    Material GetPlaceholderMaterial()
+    {
+        if (placeholderMaterial != null) return placeholderMaterial;
+
+        var shader = Shader.Find("Unlit/Color");
+        if (shader == null)
+        {
+            shader = Shader.Find("Legacy Shaders/Diffuse");
+        }
+
+        if (shader == null)
+        {
+            shader = Shader.Find("Universal Render Pipeline/Lit");
+        }
+
+        if (shader == null)
+        {
+            shader = Shader.Find("Standard");
+        }
+
+        if (shader == null)
+        {
+            shader = Shader.Find("Sprites/Default");
+        }
+
+        if (shader != null)
+        {
+            placeholderMaterial = new Material(shader)
+            {
+                color = new Color(0.12f, 0.12f, 0.12f, 1f)
+            };
+        }
+
+        return placeholderMaterial;
     }
 }

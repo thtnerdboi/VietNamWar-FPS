@@ -25,6 +25,8 @@ public class GameManager : MonoBehaviour
         {
             messageText.gameObject.SetActive(false);
         }
+
+        EnsureCrosshairExists();
     }
 
     public void SetPlayerControl(bool enabled)
@@ -83,5 +85,20 @@ public class GameManager : MonoBehaviour
         }
 
         messageRoutine = null;
+    }
+
+    void EnsureCrosshairExists()
+    {
+#if UNITY_2023_1_OR_NEWER
+        var crosshair = FindFirstObjectByType<CrosshairUI>(FindObjectsInactive.Include);
+#else
+        var crosshair = FindObjectOfType<CrosshairUI>(true);
+#endif
+        if (crosshair != null) return;
+
+        var go = new GameObject("CrosshairUI");
+        go.hideFlags = HideFlags.None;
+        go.AddComponent<CrosshairUI>();
+        DontDestroyOnLoad(go);
     }
 }
