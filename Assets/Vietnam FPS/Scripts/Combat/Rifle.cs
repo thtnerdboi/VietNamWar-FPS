@@ -17,6 +17,19 @@ public class Rifle : MonoBehaviour
     [Tooltip("Optional materials that should be applied to the instantiated model.")]
     public Material[] m16Materials;
 
+    [Header("Positioning")]
+    [Tooltip("Automatically parent the rifle to the player's camera and apply the configured offset.")]
+    public bool autoParentToCamera = true;
+
+    [Tooltip("Optional override for the camera transform that should act as the rifle parent.")]
+    public Transform cameraParentOverride;
+
+    [Tooltip("Local position of the rifle relative to the camera when auto-parenting is enabled.")]
+    public Vector3 cameraLocalPosition = new Vector3(0.2f, -0.15f, 0.4f);
+
+    [Tooltip("Local rotation (in degrees) of the rifle relative to the camera when auto-parenting is enabled.")]
+    public Vector3 cameraLocalEulerAngles = Vector3.zero;
+
     [Tooltip("Optional texture resource paths that will be applied to the first material.")]
     public List<string> textureResourcePaths = new List<string>
     {
@@ -38,6 +51,7 @@ public class Rifle : MonoBehaviour
     {
         gun = GetComponent<Gun>();
         ApplyDefaultStats();
+        EnsureParentedToCamera();
     }
 
     void Awake()
@@ -51,6 +65,7 @@ public class Rifle : MonoBehaviour
             ApplyDefaultStats();
         }
 
+        EnsureParentedToCamera();
         TryAttachVisuals();
     }
 
@@ -79,6 +94,36 @@ public class Rifle : MonoBehaviour
         Debug.LogWarning($"Rifle: Could not locate an M16 prefab at '{prefabResourcePath}'. " +
                          "Using a generated placeholder model instead.");
         visualInstance = CreatePlaceholderModel();
+    }
+
+    void EnsureParentedToCamera()
+    {
+        if (!autoParentToCamera) return;
+
+        Transform targetParent = cameraParentOverride;
+        if (targetParent == null && gun != null && gun.cam != null)
+        {
+            targetParent = gun.cam.transform;
+        }
+
+        if (targetParent == null)
+        {
+            var mainCamera = Camera.main;
+            if (mainCamera != null)
+            {
+                targetParent = mainCamera.transform;
+            }
+        }
+
+        if (targetParent == null) return;
+
+        if (transform.parent != targetParent)
+        {
+            transform.SetParent(targetParent, false);
+        }
+
+        transform.localPosition = cameraLocalPosition;
+        transform.localRotation = Quaternion.Euler(cameraLocalEulerAngles);
     }
 
     void ApplyMaterials(GameObject target)
